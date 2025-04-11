@@ -3,9 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+<<<<<<< HEAD
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/reporting/unified_analytics.dart';
 import 'package:unified_analytics/src/enums.dart';
+=======
+import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/reporting/unified_analytics.dart';
+>>>>>>> c23637390482d4cf9598c3ce3f2be31aa7332daf
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
@@ -13,15 +18,23 @@ import '../src/fakes.dart';
 
 void main() {
   const String userBranch = 'abc123';
+<<<<<<< HEAD
   const String homeDirectoryName = 'home';
   const DashTool tool = DashTool.flutterTool;
 
   late FileSystem fs;
   late Directory home;
+=======
+  const String clientIde = 'VSCode';
+
+  late MemoryFileSystem fs;
+  late Config config;
+>>>>>>> c23637390482d4cf9598c3ce3f2be31aa7332daf
   late FakeAnalytics analyticsOverride;
 
   setUp(() {
     fs = MemoryFileSystem.test();
+<<<<<<< HEAD
     home = fs.directory(homeDirectoryName);
 
     // Prepare the tests by "onboarding" the tool into the package
@@ -51,6 +64,34 @@ void main() {
         fs: fs,
       ),
     );
+=======
+    config = Config.test();
+
+    analyticsOverride = getInitializedFakeAnalyticsInstance(
+      fs: fs,
+      fakeFlutterVersion: FakeFlutterVersion(branch: userBranch),
+      clientIde: clientIde,
+    );
+  });
+
+  group('Unit testing util:', () {
+    test('getEnabledFeatures is null', () {
+      final String? enabledFeatures = getEnabledFeatures(config);
+      expect(enabledFeatures, isNull);
+    });
+
+    testWithoutContext('getEnabledFeatures not null', () {
+      config.setValue('cli-animations', true);
+      config.setValue('enable-flutter-preview', true);
+
+      final String? enabledFeatures = getEnabledFeatures(config);
+      expect(enabledFeatures, isNotNull);
+      expect(
+        enabledFeatures!.split(','),
+        unorderedEquals(<String>['enable-flutter-preview', 'cli-animations']),
+      );
+    });
+>>>>>>> c23637390482d4cf9598c3ce3f2be31aa7332daf
   });
 
   group('Unit testing getAnalytics', () {
@@ -60,10 +101,22 @@ void main() {
         flutterVersion: FakeFlutterVersion(),
         environment: const <String, String>{},
         analyticsOverride: analyticsOverride,
+<<<<<<< HEAD
       );
 
       expect(analytics.clientId, isNot(NoOpAnalytics.staticClientId),
           reason: 'The CLIENT ID should be a randomly generated id');
+=======
+        clientIde: clientIde,
+        config: config,
+      );
+
+      expect(
+        analytics.clientId,
+        isNot(NoOpAnalytics.staticClientId),
+        reason: 'The CLIENT ID should be a randomly generated id',
+      );
+>>>>>>> c23637390482d4cf9598c3ce3f2be31aa7332daf
       expect(analytics, isNot(isA<NoOpAnalytics>()));
     });
 
@@ -76,6 +129,11 @@ void main() {
         ),
         environment: const <String, String>{},
         analyticsOverride: analyticsOverride,
+<<<<<<< HEAD
+=======
+        clientIde: clientIde,
+        config: config,
+>>>>>>> c23637390482d4cf9598c3ce3f2be31aa7332daf
       );
 
       expect(
@@ -89,11 +147,19 @@ void main() {
     testWithoutContext('NoOp instance for unknown branch', () {
       final Analytics analytics = getAnalytics(
         runningOnBot: false,
+<<<<<<< HEAD
         flutterVersion: FakeFlutterVersion(
           frameworkRevision: 'unknown',
         ),
         environment: const <String, String>{},
         analyticsOverride: analyticsOverride,
+=======
+        flutterVersion: FakeFlutterVersion(frameworkRevision: 'unknown'),
+        environment: const <String, String>{},
+        analyticsOverride: analyticsOverride,
+        clientIde: clientIde,
+        config: config,
+>>>>>>> c23637390482d4cf9598c3ce3f2be31aa7332daf
       );
 
       expect(
@@ -110,6 +176,11 @@ void main() {
         flutterVersion: FakeFlutterVersion(),
         environment: const <String, String>{},
         analyticsOverride: analyticsOverride,
+<<<<<<< HEAD
+=======
+        clientIde: clientIde,
+        config: config,
+>>>>>>> c23637390482d4cf9598c3ce3f2be31aa7332daf
       );
 
       expect(
@@ -122,10 +193,19 @@ void main() {
 
     testWithoutContext('NoOp instance when suppressing via env variable', () {
       final Analytics analytics = getAnalytics(
+<<<<<<< HEAD
         runningOnBot: true,
         flutterVersion: FakeFlutterVersion(),
         environment: const <String, String>{'FLUTTER_SUPPRESS_ANALYTICS': 'true'},
         analyticsOverride: analyticsOverride,
+=======
+        runningOnBot: false,
+        flutterVersion: FakeFlutterVersion(),
+        environment: const <String, String>{'FLUTTER_SUPPRESS_ANALYTICS': 'true'},
+        analyticsOverride: analyticsOverride,
+        clientIde: clientIde,
+        config: config,
+>>>>>>> c23637390482d4cf9598c3ce3f2be31aa7332daf
       );
 
       expect(
@@ -135,5 +215,34 @@ void main() {
       );
       expect(analytics, isA<NoOpAnalytics>());
     });
+<<<<<<< HEAD
+=======
+
+    testWithoutContext('Suppression prevents events from being sent', () {
+      expect(analyticsOverride.okToSend, true);
+      analyticsOverride.send(Event.surveyShown(surveyId: 'surveyId'));
+      expect(analyticsOverride.sentEvents, hasLength(1));
+
+      analyticsOverride.suppressTelemetry();
+      expect(analyticsOverride.okToSend, false);
+      analyticsOverride.send(Event.surveyShown(surveyId: 'surveyId'));
+
+      expect(analyticsOverride.sentEvents, hasLength(1));
+    });
+
+    testWithoutContext('Client IDE is passed and found in events', () {
+      final Analytics analytics = getAnalytics(
+        runningOnBot: false,
+        flutterVersion: FakeFlutterVersion(),
+        environment: const <String, String>{},
+        analyticsOverride: analyticsOverride,
+        clientIde: clientIde,
+        config: config,
+      );
+      analytics as FakeAnalytics;
+
+      expect(analytics.userProperty.clientIde, 'VSCode');
+    });
+>>>>>>> c23637390482d4cf9598c3ce3f2be31aa7332daf
   });
 }

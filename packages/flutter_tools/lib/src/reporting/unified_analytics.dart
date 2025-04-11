@@ -4,6 +4,13 @@
 
 import 'package:unified_analytics/unified_analytics.dart';
 
+<<<<<<< HEAD
+=======
+import '../base/config.dart';
+import '../base/io.dart';
+import '../features.dart';
+import '../globals.dart' as globals;
+>>>>>>> c23637390482d4cf9598c3ce3f2be31aa7332daf
 import '../version.dart';
 
 /// This function is called from within the context runner to perform
@@ -19,21 +26,35 @@ Analytics getAnalytics({
   required bool runningOnBot,
   required FlutterVersion flutterVersion,
   required Map<String, String> environment,
+<<<<<<< HEAD
+=======
+  required String? clientIde,
+  required Config config,
+>>>>>>> c23637390482d4cf9598c3ce3f2be31aa7332daf
   bool enableAsserts = false,
   FakeAnalytics? analyticsOverride,
 }) {
   final String version = flutterVersion.getVersionString(redactUnknownBranches: true);
   final bool suppressEnvFlag = environment['FLUTTER_SUPPRESS_ANALYTICS']?.toLowerCase() == 'true';
 
+<<<<<<< HEAD
   if (// Ignore local user branches.
       version.startsWith('[user-branch]') ||
+=======
+  if ( // Ignore local user branches.
+  version.startsWith('[user-branch]') ||
+>>>>>>> c23637390482d4cf9598c3ce3f2be31aa7332daf
       // Many CI systems don't do a full git checkout.
       version.endsWith('/unknown') ||
       // Ignore bots.
       runningOnBot ||
       // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
       suppressEnvFlag) {
+<<<<<<< HEAD
     return NoOpAnalytics();
+=======
+    return const NoOpAnalytics();
+>>>>>>> c23637390482d4cf9598c3ce3f2be31aa7332daf
   }
 
   // Providing an override of the [Analytics] instance is preferred when
@@ -48,5 +69,34 @@ Analytics getAnalytics({
     flutterVersion: flutterVersion.frameworkVersion,
     dartVersion: flutterVersion.dartSdkVersion,
     enableAsserts: enableAsserts,
+<<<<<<< HEAD
   );
 }
+=======
+    clientIde: clientIde,
+    enabledFeatures: getEnabledFeatures(config),
+  );
+}
+
+/// Uses the [Config] object to get enabled features.
+String? getEnabledFeatures(Config config) {
+  // Create string with all enabled features to send as user property
+  final Iterable<Feature> enabledFeatures = allFeatures.where((Feature feature) {
+    final String? configSetting = feature.configSetting;
+    return configSetting != null && config.getValue(configSetting) == true;
+  });
+  return enabledFeatures.isNotEmpty
+      ? enabledFeatures.map((Feature feature) => feature.configSetting).join(',')
+      : null;
+}
+
+/// Function to safely grab the max rss from [ProcessInfo].
+int? getMaxRss(ProcessInfo processInfo) {
+  try {
+    return globals.processInfo.maxRss;
+  } on Exception catch (error) {
+    globals.printTrace('Querying maxRss failed with error: $error');
+  }
+  return null;
+}
+>>>>>>> c23637390482d4cf9598c3ce3f2be31aa7332daf
